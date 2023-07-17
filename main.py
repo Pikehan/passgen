@@ -1,5 +1,3 @@
-#import faulthandler
-
 from PyQt5.QtWidgets import QApplication
 from PyQt5 import QtWidgets, QtGui
 import sys
@@ -8,11 +6,11 @@ import MainWindow
 import passgen
 import options
 
-"""from subprocess import run
+"""
+from subprocess import run
 
-faulthandler.enable()
-
-run("pyuic5 -o MainWindow.py Ui.ui", shell=True)"""
+run("pyuic5 -o MainWindow.py Ui.ui", shell=True)
+"""
 
 
 class MainWidget(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
