@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'Untitled.ui'
+# Form implementation generated from reading ui file 'Ui.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.9
 #
@@ -14,9 +14,8 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(681, 350)
-        MainWindow.setMinimumSize(QtCore.QSize(458, 350))
-        MainWindow.setMaximumSize(QtCore.QSize(681, 350))
+        MainWindow.resize(675, 757)
+        MainWindow.setMinimumSize(QtCore.QSize(675, 757))
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.gridLayout = QtWidgets.QGridLayout(self.centralwidget)
@@ -80,6 +79,26 @@ class Ui_MainWindow(object):
         self.generate_button.setSizePolicy(sizePolicy)
         self.generate_button.setObjectName("generate_button")
         self.verticalLayout.addWidget(self.generate_button)
+        self.horizontalLayout_4 = QtWidgets.QHBoxLayout()
+        self.horizontalLayout_4.setObjectName("horizontalLayout_4")
+        self.add_to_list_button = QtWidgets.QPushButton(self.centralwidget)
+        self.add_to_list_button.setObjectName("add_to_list_button")
+        self.horizontalLayout_4.addWidget(self.add_to_list_button)
+        self.remove_from_list_button = QtWidgets.QPushButton(self.centralwidget)
+        self.remove_from_list_button.setObjectName("remove_from_list_button")
+        self.horizontalLayout_4.addWidget(self.remove_from_list_button)
+        self.verticalLayout.addLayout(self.horizontalLayout_4)
+        self.tableWidget = QtWidgets.QTableWidget(self.centralwidget)
+        self.tableWidget.setObjectName("tableWidget")
+        self.tableWidget.setColumnCount(3)
+        self.tableWidget.setRowCount(0)
+        item = QtWidgets.QTableWidgetItem()
+        self.tableWidget.setHorizontalHeaderItem(0, item)
+        item = QtWidgets.QTableWidgetItem()
+        self.tableWidget.setHorizontalHeaderItem(1, item)
+        item = QtWidgets.QTableWidgetItem()
+        self.tableWidget.setHorizontalHeaderItem(2, item)
+        self.verticalLayout.addWidget(self.tableWidget)
         self.gridLayout.addLayout(self.verticalLayout, 0, 0, 1, 1)
         MainWindow.setCentralWidget(self.centralwidget)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
@@ -100,3 +119,11 @@ class Ui_MainWindow(object):
         self.symbolsCheck.setText(_translate("MainWindow", "Include Symbols"))
         self.label_2.setText(_translate("MainWindow", "Length"))
         self.generate_button.setText(_translate("MainWindow", "Generate"))
+        self.add_to_list_button.setText(_translate("MainWindow", "Add to List"))
+        self.remove_from_list_button.setText(_translate("MainWindow", "Remove from List"))
+        item = self.tableWidget.horizontalHeaderItem(0)
+        item.setText(_translate("MainWindow", "Account"))
+        item = self.tableWidget.horizontalHeaderItem(1)
+        item.setText(_translate("MainWindow", "Username"))
+        item = self.tableWidget.horizontalHeaderItem(2)
+        item.setText(_translate("MainWindow", "Password"))
