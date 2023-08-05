@@ -6,11 +6,6 @@ import MainWindow
 import passgen
 import options
 
-from subprocess import run
-
-run("pyuic5 -o MainWindow.py Ui.ui", shell=True)
-
-
 class MainWidget(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
     def __init__(self):
         super().__init__()
