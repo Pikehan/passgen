@@ -1,76 +1,102 @@
-from PyQt5 import QtWidgets, QtGui
+from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtWidgets import QApplication, QTableWidgetItem
 import sys
+import json
 
 import MainWindow
 import passgen
 import options
+
 
 class MainWidget(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
     def __init__(self):
         super().__init__()
         self.setupUi(self)
 
+        self.tableWidget.setColumnWidth(2, 190)
+        self.tableWidget.setColumnCount(3)
         self.copy_button.setEnabled(False)
-        self.generate_button.clicked.connect(self.generate_onclick)
-        self.copy_button.clicked.connect(self.copy_onclick)
-        self.add_to_list_button.clicked.connect(self.add_to_list)
-        self.remove_from_list_button.clicked.connect(self.remove_from_list)
+        self.add_to_list_button.setEnabled(False)
 
-        self.pwd_list = []
+        self.copy_button.clicked.connect(self.copy_on_click)
+        self.generate_button.clicked.connect(self.set_password)
+        self.add_to_list_button.clicked.connect(self.pwd_dict)
+        self.remove_from_list_button.clicked.connect(self.remove_from_dict)
+        self.tableWidget.cellChanged.connect(self.add_to_dict)
+        self.tableWidget.cellClicked.connect(self.pwd_show)
 
-        self.load_password()
+        self.tableData = []
 
-    def load_password(self):
-        try:
-            with open("./passwords", mode="r") as F:
-                lines = F.readlines()
-            list_of_pwd = lines[0].split("|")
-            self.pwd_list = list_of_pwd
+        self.load_data()
 
-            self.tableWidget.setRowCount(len(list_of_pwd))
-            self.tableWidget.setColumnCount(3)
-            self.tableWidget.setColumnWidth(2, 300)
-
-            for pwd_count in range(len(list_of_pwd)):
-                self.tableWidget.setItem(pwd_count, 2, QTableWidgetItem(list_of_pwd[pwd_count]))
-
-            self.remove_from_list_button.setEnabled(True)
-
-        except:
-            self.tableWidget.setRowCount(0)
-            self.remove_from_list_button.setEnabled(False)
-
-    def generate_onclick(self):
-        self.set_password()
-
-    def copy_onclick(self):
+    def copy_on_click(self):
         QtGui.QGuiApplication.clipboard().setText(self.pwd_out.text())
 
-    def add_to_list(self):
-        self.pwd_list.append(self.pwd_out.text())
-
-        with open("./passwords", mode="w+") as F:
-            F.write("|".join(self.pwd_list))
-
-        self.load_password()
-
-    def remove_from_list(self):
-        current_row = self.tableWidget.currentRow()
+    def load_data(self):
+        try:
+            with open("./data", mode="r") as F:
+                data = F.read()
+        except FileNotFoundError:
+            print("File not found")
+            return
 
         try:
-            self.pwd_list.remove(self.tableWidget.item(current_row, 2).text())
-            with open("./passwords", mode="w+") as F:
-                F.write("|".join(self.pwd_list))
+            self.tableData = json.loads(data)
+        except ValueError:
+            if not data:
+                print("File is empty")
+                return
+            else:
+                print("File is corrupted")
+                return
 
-            self.load_password()
+        if self.tableData:
+            self.remove_from_list_button.setEnabled(True)
+        else:
+            self.remove_from_list_button.setEnabled(False)
 
-        except Exception as e:
-            print(e)
+        self.tableWidget.cellChanged.disconnect(self.add_to_dict)
+        self.tableWidget.setRowCount(len(self.tableData))
+        self.tableWidget.clearContents()
 
-    def save_changes(self):
-        for currentQTableWidgetItem in self.tableWidget.selectedItems():
-            projectName = self.tableWidget.item(currentQTableWidgetItem.row(), 0).text()
+        for idx, dict_ in enumerate(self.tableData):
+            for type_, data_ in dict_.items():
+                self.tableWidget.setItem(idx, int(type_), QTableWidgetItem(data_))
+
+        self.tableWidget.cellChanged.connect(self.add_to_dict)
+
+    def pwd_dict(self):
+        data = self.pwd_out.text()
+        dict_pwd = {"2": data}
+        self.tableData.append(dict_pwd)
+
+        self.write_to_json()
+
+        print(self.tableData)
+
+    def add_to_dict(self):
+        current_row = self.tableWidget.currentRow()
+        current_column = self.tableWidget.currentColumn()
+        self.tableData[current_row][str(current_column)] = self.tableWidget.currentItem().text()
+
+        self.write_to_json()
+
+        print(self.tableData)
+
+    def remove_from_dict(self):
+        current_row = self.tableWidget.currentRow()
+        del self.tableData[current_row]
+
+        self.write_to_json()
+
+        print(self.tableData)
+
+    def write_to_json(self):
+        json_ = json.dumps(self.tableData)
+        with open("./data", mode="w+") as F:
+            F.write(json_)
+
+        self.load_data()
 
     def get_character(self):
         chars = ''
@@ -94,21 +120,26 @@ class MainWidget(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
             self.add_to_list_button.setEnabled(False)
             return
 
-        try:
-            generated_pwd = passgen.generate_password(
-                pwd_length=self.length_box.value(),
-                character=self.get_character())
-            self.pwd_out.setText(generated_pwd)
+        generated_pwd = passgen.generate_password(
+            pwd_length=self.length_box.value(),
+            character=self.get_character())
+        self.pwd_out.setText(generated_pwd)
 
-            self.copy_button.setEnabled(True)
-            self.add_to_list_button.setEnabled(True)
+        self.copy_button.setEnabled(True)
+        self.add_to_list_button.setEnabled(True)
 
-        except IndexError:
-            self.pwd_out.clear()
+    def pwd_show(self):
+        current_row = self.tableWidget.currentRow()
+        self.pwd_out.setText(self.tableData[current_row]["2"])
+        self.add_to_list_button.setEnabled(True)
+        self.copy_button.setEnabled(True)
 
     def closeEvent(self, event: QtGui.QCloseEvent) -> None:
         QApplication.clipboard().clear()
 
+
+QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)  # enable highdpi scaling
+QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)  # use highdpi icons
 
 if __name__ == "__main__":
     app = QApplication([])
