@@ -6,6 +6,7 @@ import json
 import MainWindow
 import passgen
 import options
+import crypt
 
 
 class MainWidget(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
@@ -17,6 +18,7 @@ class MainWidget(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
         self.tableWidget.setColumnCount(3)
         self.copy_button.setEnabled(False)
         self.add_to_list_button.setEnabled(False)
+        self.remove_from_list_button.setEnabled(False)
 
         self.copy_button.clicked.connect(self.copy_on_click)
         self.generate_button.clicked.connect(self.set_password)
@@ -34,8 +36,7 @@ class MainWidget(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
 
     def load_data(self):
         try:
-            with open("./data", mode="r") as F:
-                data = F.read()
+            data = crypt.decrypt_()
         except FileNotFoundError:
             print("File not found")
             return
@@ -43,13 +44,12 @@ class MainWidget(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
         try:
             self.tableData = json.loads(data)
         except ValueError:
-            if not data:
-                print("File is empty")
-                return
-            else:
-                print("File is corrupted")
-                return
+            print("File is corrupted")
+            return
 
+        self.refresh_ui()
+
+    def refresh_ui(self):
         if self.tableData:
             self.remove_from_list_button.setEnabled(True)
         else:
@@ -93,10 +93,9 @@ class MainWidget(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
 
     def write_to_json(self):
         json_ = json.dumps(self.tableData)
-        with open("./data", mode="w+") as F:
-            F.write(json_)
+        crypt.encrypt_(json_)
 
-        self.load_data()
+        self.refresh_ui()
 
     def get_character(self):
         chars = ''
